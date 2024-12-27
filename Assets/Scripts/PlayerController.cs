@@ -105,14 +105,19 @@ public class PlayerController : MonoBehaviour
     private void Aim()
     {
         var position = GetMousePosition();
-        if (position != Vector3.zero)
-        {
-            var direction = position - transform.position;
+        if (position == Vector3.zero) return;
 
-            direction.y = 0;
+        // Calculates the vector from the point to the camera
+        Vector3 pointToCam = _camera.transform.position - position;
+        float t = (_firePoint.position.y - position.y) / pointToCam.y;
+        position.x += t * pointToCam.x;
+        position.z += t * pointToCam.z;
+        
+        var direction = position - transform.position;
 
-            _playerModel.forward = direction;
-        }
+        direction.y = 0;
+
+        _playerModel.forward = direction;
     }
 
     private void Shoot()
