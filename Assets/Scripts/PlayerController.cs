@@ -4,24 +4,31 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 3f;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private BulletPool bulletPool;
 
     private InputAction _moveAction;
+    private InputAction _attackAction;
 
     private Vector3 _cameraForward;
     private Vector3 _cameraRight;
-
-    [SerializeField] private LayerMask groundMask;
     
     private CharacterController _controller;
     private InputSystem_Actions _inputSystemActions;
     private Camera _camera;
+    
     private Transform _playerModel;
+    private Transform _firePoint;
+    
+    // Placeholder fire rate
+    [SerializeField] private float fireRate = 0.5f;
+    private float _lastShotTime = 0;
 
     private void Awake()
     {
         // Get the player camera
-        _camera = transform.Find("Camera Holder/Player Camera").GetComponent<Camera>();
+        _camera = transform.Find("CameraHolder/PlayerCamera").GetComponent<Camera>();
         if (_camera == null)
         {
             Debug.LogError("Camera not found");
@@ -34,9 +41,12 @@ public class PlayerController : MonoBehaviour
         _controller = GetComponent<CharacterController>();
         // Get the transform of the player model
         _playerModel = transform.Find("Body");
+        // Get the point where the bullets will spawn
+        _firePoint = transform.Find("Body/FirePoint");
 
-        // Get the move action from the Input system so that the movement vector can be read later
+        // Get the move and attack actions from the Input system so that the input can be read later
         _moveAction = InputSystem.actions.FindAction("Move");
+        _attackAction = InputSystem.actions.FindAction("Attack");
         
         // Update the direction the player will move relative to
         UpdateMovementDirection();
@@ -50,6 +60,7 @@ public class PlayerController : MonoBehaviour
     {
         Move();
         Aim();
+        Shoot();
     }
 
     private void Move()
@@ -102,5 +113,20 @@ public class PlayerController : MonoBehaviour
 
             _playerModel.forward = direction;
         }
+    }
+
+    private void Shoot()
+    {
+        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate)
+        {
+            return;
+        }
+
+        _lastShotTime = Time.time;
+        
+        GameObject bullet = bulletPool.GetBullet();
+        if (!bullet) return;
+        bullet.transform.position = _firePoint.position;
+        bullet.transform.rotation = _firePoint.rotation;
     }
 }
