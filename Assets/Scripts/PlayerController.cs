@@ -104,14 +104,9 @@ public class PlayerController : MonoBehaviour
 
     private void Aim()
     {
-        var position = GetMousePosition();
-        if (position == Vector3.zero) return;
+        var ray = _camera.ScreenPointToRay(Input.mousePosition);
 
-        // Calculates the vector from the point to the camera
-        Vector3 pointToCam = _camera.transform.position - position;
-        float t = (_firePoint.position.y - position.y) / pointToCam.y;
-        position.x += t * pointToCam.x;
-        position.z += t * pointToCam.z;
+        Vector3 position = GetRayPlaneIntersection(ray, _firePoint.position.y);
         
         var direction = position - transform.position;
 
@@ -133,5 +128,22 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
+    }
+    
+    private Vector3 GetRayPlaneIntersection(Ray ray, float targetY)
+    {
+        // Calculate the t value for the intersection
+        float t = (targetY - ray.origin.y) / ray.direction.y;
+
+        // If t is negative, the intersection point is behind the ray's origin
+        if (t < 0)
+        {
+            return Vector3.zero; // No intersection in front of the ray
+        }
+
+        // Calculate the intersection point
+        Vector3 intersection = ray.origin + t * ray.direction;
+
+        return intersection;
     }
 }
