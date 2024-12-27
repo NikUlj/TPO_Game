@@ -5,22 +5,25 @@ using UnityEngine.AI;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private int health = 20;
-    [SerializeField] private int attackDistance = 2;
-    
+    [SerializeField] private float attackDistance = 2f;
+    [SerializeField] private float attackCooldown = 1f;
+    [SerializeField] private int attackDamage = 5;
+
+    private float _lastDamageTime;
+
+    private PlayerController _player;
     private Transform _playerTransform;
     private NavMeshAgent _agent;
-
-    private float _defaultSpeed;
     
     private void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
-        _defaultSpeed = _agent.speed;
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         
         if (player != null)
         {
             _playerTransform = player.transform;
+            _player = _playerTransform.transform.GetComponent<PlayerController>();
         }
         else
         {
@@ -46,6 +49,12 @@ public class Enemy : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(directionToPlayer);
                 transform.rotation = targetRotation;
             }
+
+            if (Time.time >= _lastDamageTime + attackCooldown)
+            {
+                _player.TakeDamage(attackDamage);
+                _lastDamageTime = Time.time;
+            }
         }
         else
         {
@@ -55,7 +64,7 @@ public class Enemy : MonoBehaviour
         
 
     }
-
+    
     public void TakeDamage(int damage)
     {
         health -= damage;

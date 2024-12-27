@@ -5,8 +5,11 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private LayerMask groundMask;
-    [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private BulletPool bulletPool;
+    
+    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float fireRate = 0.5f;
+    [SerializeField] private int health = 20;
 
     private InputAction _moveAction;
     private InputAction _attackAction;
@@ -22,8 +25,7 @@ public class PlayerController : MonoBehaviour
     private Transform _firePoint;
     
     // Placeholder fire rate
-    [SerializeField] private float fireRate = 0.5f;
-    private float _lastShotTime = 0;
+    private float _lastShotTime;
 
     private void Awake()
     {
@@ -89,19 +91,6 @@ public class PlayerController : MonoBehaviour
         _cameraRight = _cameraRight.normalized;
     }
 
-    private Vector3 GetMousePosition()
-    {
-        // Cast ray from camera through the mouse position
-        var ray = _camera.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out var hitInfo, 1000, groundMask))
-        {
-            return hitInfo.point;
-        }
-
-        return Vector3.zero;
-    }
-
     private void Aim()
     {
         var ray = _camera.ScreenPointToRay(Input.mousePosition);
@@ -145,5 +134,18 @@ public class PlayerController : MonoBehaviour
         Vector3 intersection = ray.origin + t * ray.direction;
 
         return intersection;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            Debug.Log("You died");
+        }
+        else
+        {
+            Debug.Log("You took damage, your current health: " + health);
+        }
     }
 }

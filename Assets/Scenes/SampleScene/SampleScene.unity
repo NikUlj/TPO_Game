@@ -1057,6 +1057,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1942588081931850628, guid: 01ed66edd11cac447b58abe1dd7d1a1c, type: 3}
+      propertyPath: orthographic
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6704956024355067406, guid: 01ed66edd11cac447b58abe1dd7d1a1c, type: 3}
       propertyPath: bulletPool
       value: 
