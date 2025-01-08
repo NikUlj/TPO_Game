@@ -5,27 +5,31 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private LayerMask groundMask;
-    [SerializeField] private BulletPool bulletPool;
-    
+    [SerializeField] private BulletPool sphereBulletPool;
+    [SerializeField] private BulletPool cubeBulletPool;
+    [SerializeField] private BulletPool cylinderBulletPool;
+
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float fireRate = 0.5f;
     [SerializeField] private int health = 20;
 
     private InputAction _moveAction;
     private InputAction _attackAction;
+    private InputAction _switchToSphereAction;
+    private InputAction _switchToCubeAction;
+    private InputAction _switchToCylinderAction;
 
     private Vector3 _cameraForward;
     private Vector3 _cameraRight;
-    
+
     private CharacterController _controller;
-    private InputSystem_Actions _inputSystemActions;
     private Camera _camera;
-    
+
     private Transform _playerModel;
     private Transform _firePoint;
-    
-    // Placeholder fire rate
+
     private float _lastShotTime;
+    private BulletPool _currentBulletPool;
 
     private void Awake()
     {
@@ -37,7 +41,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         _controller = GetComponent<CharacterController>();
@@ -46,18 +49,44 @@ public class PlayerController : MonoBehaviour
         // Get the point where the bullets will spawn
         _firePoint = transform.Find("Body/FirePoint");
 
-        // Get the move and attack actions from the Input system so that the input can be read later
+        // Set initial bullet pool to sphere
+        _currentBulletPool = sphereBulletPool;
+
+        // Get the standard actions
         _moveAction = InputSystem.actions.FindAction("Move");
         _attackAction = InputSystem.actions.FindAction("Attack");
-        
+
+        // Get the actions for weapon switching
+        _switchToSphereAction = InputSystem.actions.FindAction("Ammo1");  // Key 1
+        _switchToCubeAction = InputSystem.actions.FindAction("Ammo2");     // Key 2
+        _switchToCylinderAction = InputSystem.actions.FindAction("Ammo3"); // Key 3
+
+        // Subscribe to weapon switch events
+        _switchToSphereAction.performed += _ => SwitchWeapon(sphereBulletPool, "Sphere");
+        _switchToCubeAction.performed += _ => SwitchWeapon(cubeBulletPool, "Cube");
+        _switchToCylinderAction.performed += _ => SwitchWeapon(cylinderBulletPool, "Cylinder");
+
         // Update the direction the player will move relative to
         UpdateMovementDirection();
-        
+
         // Confine the cursor to the screen
         Cursor.lockState = CursorLockMode.Confined;
     }
 
-    // Update is called once per frame
+    private void OnEnable()
+    {
+        _switchToSphereAction?.Enable();
+        _switchToCubeAction?.Enable();
+        _switchToCylinderAction?.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _switchToSphereAction?.Disable();
+        _switchToCubeAction?.Disable();
+        _switchToCylinderAction?.Disable();
+    }
+
     void Update()
     {
         Move();
@@ -69,9 +98,9 @@ public class PlayerController : MonoBehaviour
     {
         // Get the movement input
         Vector2 moveValue = _moveAction.ReadValue<Vector2>();
-        if (moveValue == Vector2.zero) 
+        if (moveValue == Vector2.zero)
             return;
-        
+
         // Transform the movement direction to world space on a 2D plane
         Vector3 moveDir = (_cameraForward * moveValue.y + _cameraRight * moveValue.x).normalized;
 
@@ -83,10 +112,10 @@ public class PlayerController : MonoBehaviour
     {
         _cameraForward = _camera.transform.forward;
         _cameraRight = _camera.transform.right;
-        
+
         _cameraForward.y = 0;
         _cameraRight.y = 0;
-        
+
         _cameraForward = _cameraForward.normalized;
         _cameraRight = _cameraRight.normalized;
     }
@@ -96,7 +125,7 @@ public class PlayerController : MonoBehaviour
         var ray = _camera.ScreenPointToRay(Input.mousePosition);
 
         Vector3 position = GetRayPlaneIntersection(ray, _firePoint.position.y);
-        
+
         var direction = position - transform.position;
 
         direction.y = 0;
@@ -106,19 +135,25 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate)
+        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate || _currentBulletPool == null)
         {
             return;
         }
 
         _lastShotTime = Time.time;
-        
-        GameObject bullet = bulletPool.GetBullet();
+
+        GameObject bullet = _currentBulletPool.GetBullet();
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
     }
-    
+
+    private void SwitchWeapon(BulletPool newPool, string weaponName)
+    {
+        _currentBulletPool = newPool;
+        Debug.Log($"Switched to {weaponName} ammo");
+    }
+
     private Vector3 GetRayPlaneIntersection(Ray ray, float targetY)
     {
         // Calculate the t value for the intersection

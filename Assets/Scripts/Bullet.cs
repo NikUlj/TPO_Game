@@ -3,6 +3,15 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
+    public enum BulletType
+    {
+        Sphere,
+        Cube,
+        Cylinder
+    }
+
+    [SerializeField] private BulletType bulletType;
+
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
     [SerializeField] private float checkRadius = 0.25f;
@@ -31,14 +40,22 @@ public class Bullet : MonoBehaviour
             if (hitInfo.collider.CompareTag("Enemy"))
             {
                 Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+
                 if (enemy)
                 {
-                    enemy.TakeDamage(damage);
+                    if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
+                        enemy.TakeDamage(damage);
                 }
             }
             gameObject.SetActive(false);
         }
         
         transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+    }
+
+    bool CanDamageEnemyType(string enemyType)
+    {
+        return bulletType.ToString() == enemyType;
+
     }
 }
