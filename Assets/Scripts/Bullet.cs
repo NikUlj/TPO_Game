@@ -14,7 +14,7 @@ public class Bullet : MonoBehaviour
 
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
-    [SerializeField] private float checkRadius = 0.25f;
+    [SerializeField] private float checkRadius = 0.5f;
     [SerializeField] public int damage = 5;
 
     private readonly Collider[] _overlaps = new Collider[10];
@@ -36,9 +36,9 @@ public class Bullet : MonoBehaviour
             {
                 var col = _overlaps[i];
                 
-                if (col == null) break;
+                if (!col) break;
                 
-                Debug.Log("Collider detected: " + col.gameObject.name + ", Tag: " + col.tag);
+                
                 
                 if (col.CompareTag("Enemy"))
                 {
@@ -67,23 +67,43 @@ public class Bullet : MonoBehaviour
             return;
         }
 
-        Ray ray = new Ray(transform.position, transform.forward);
-        if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
-        {
-            if (hitInfo.collider.CompareTag("Enemy"))
-            {
-                Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
-
-                if (enemy)
-                {
-                    if (CanDamageEnemyType(enemy.GetEnemyType()))
-                        enemy.TakeDamage(damage);
-                }
-            }
-            gameObject.SetActive(false);
-        }
+        // Ray ray = new Ray(transform.position, transform.forward);
+        // if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
+        // {
+        //     Debug.Log("Collider detected: " + hitInfo.collider.gameObject.name + ", Tag: " + hitInfo.collider.gameObject.tag);
+        //     if (hitInfo.collider.CompareTag("Enemy"))
+        //     {
+        //         Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+        //
+        //         if (enemy)
+        //         {
+        //             if (CanDamageEnemyType(enemy.GetEnemyType()))
+        //                 enemy.TakeDamage(damage);
+        //         }
+        //     }
+        //     gameObject.SetActive(false);
+        // }
+        
+        // CheckSpawn();
     
         transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+
+        Debug.Log("Collider detected: " + other.gameObject.name + ", Tag: " + other.gameObject.tag);
+        if (other.CompareTag("Enemy"))
+        {
+            Enemy enemy = other.GetComponent<Enemy>();
+    
+            if (enemy)
+            {
+                if (CanDamageEnemyType(enemy.GetEnemyType()))
+                    enemy.TakeDamage(damage);
+            }
+        }
+        gameObject.SetActive(false);
     }
 
     bool CanDamageEnemyType(Enemy.EnemyType enemyType)

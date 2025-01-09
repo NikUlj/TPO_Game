@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
-        bullet.GetComponent<Bullet>().CheckSpawn();
+        // bullet.GetComponent<Bullet>().CheckSpawn();
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)
