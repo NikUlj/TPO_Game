@@ -82,9 +82,12 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+  sphereBulletPool: {fileID: 0}
+  cubeBulletPool: {fileID: 0}
+  cylinderBulletPool: {fileID: 0}
   moveSpeed: 3
-  bulletPool: {fileID: 0}
   fireRate: 0.2
+  health: 20
 --- !u!143 &240575725082285733
 CharacterController:
   m_ObjectHideFlags: 0

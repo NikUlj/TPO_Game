@@ -135,7 +135,7 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate || _currentBulletPool == null)
+        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate || !_currentBulletPool)
         {
             return;
         }
@@ -146,6 +146,7 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
+        bullet.GetComponent<Bullet>().CheckSpawn();
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)

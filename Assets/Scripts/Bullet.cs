@@ -22,12 +22,23 @@ public class Bullet : MonoBehaviour
 
     private void OnEnable()
     {
+        _timeActive = 0f;
+    }
+
+    public void CheckSpawn()
+    {
+        Array.Clear(_overlaps, 0, _overlaps.Length);
         int length = Physics.OverlapSphereNonAlloc(transform.position, checkRadius, _overlaps);
+        Debug.Log(length);
         if (length > 0)
         {
-            foreach (Collider col in _overlaps)
+            for (int i = 0; i < length; i++)
             {
+                var col = _overlaps[i];
+                
                 if (col == null) break;
+                
+                Debug.Log("Collider detected: " + col.gameObject.name + ", Tag: " + col.tag);
                 
                 if (col.CompareTag("Enemy"))
                 {
@@ -40,48 +51,44 @@ public class Bullet : MonoBehaviour
                     }
 
                     gameObject.SetActive(false);
-                    return;
                 }
-
-                gameObject.SetActive(false);
             }
+            gameObject.SetActive(false);
         }
-        
-        _timeActive = 0f;
     }
 
     // Update is called once per frame
-        void Update()
+    void Update()
+    {
+        _timeActive += Time.deltaTime;
+        if (_timeActive >= lifetime)
         {
-            _timeActive += Time.deltaTime;
-            if (_timeActive >= lifetime)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
+            gameObject.SetActive(false);
+            return;
+        }
 
-            Ray ray = new Ray(transform.position, transform.forward);
-            if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
+        Ray ray = new Ray(transform.position, transform.forward);
+        if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
+        {
+            if (hitInfo.collider.CompareTag("Enemy"))
             {
-                if (hitInfo.collider.CompareTag("Enemy"))
+                Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+
+                if (enemy)
                 {
-                    Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
-
-                    if (enemy)
-                    {
-                        if (CanDamageEnemyType(enemy.GetEnemyType()))
-                            enemy.TakeDamage(damage);
-                    }
+                    if (CanDamageEnemyType(enemy.GetEnemyType()))
+                        enemy.TakeDamage(damage);
                 }
-                gameObject.SetActive(false);
             }
-        
-            transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+            gameObject.SetActive(false);
         }
+    
+        transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+    }
 
-        bool CanDamageEnemyType(Enemy.EnemyType enemyType)
-        {
-            return (int)bulletType == (int)enemyType;
+    bool CanDamageEnemyType(Enemy.EnemyType enemyType)
+    {
+        return (int)bulletType == (int)enemyType;
 
-        }
+    }
 }
