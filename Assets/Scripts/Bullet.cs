@@ -23,7 +23,6 @@ public class Bullet : MonoBehaviour
     private void OnEnable()
     {
         int length = Physics.OverlapSphereNonAlloc(transform.position, checkRadius, _overlaps);
-        Debug.Log("Array length: " + length);
         if (length > 0)
         {
             foreach (Collider col in _overlaps)
@@ -36,7 +35,7 @@ public class Bullet : MonoBehaviour
 
                     if (enemy)
                     {
-                        if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
+                        if (CanDamageEnemyType(enemy.GetEnemyType()))
                             enemy.TakeDamage(damage);
                     }
 
@@ -70,7 +69,7 @@ public class Bullet : MonoBehaviour
 
                     if (enemy)
                     {
-                        if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
+                        if (CanDamageEnemyType(enemy.GetEnemyType()))
                             enemy.TakeDamage(damage);
                     }
                 }
@@ -80,9 +79,9 @@ public class Bullet : MonoBehaviour
             transform.Translate(Vector3.forward * (speed * Time.deltaTime));
         }
 
-        bool CanDamageEnemyType(string enemyType)
+        bool CanDamageEnemyType(Enemy.EnemyType enemyType)
         {
-            return bulletType.ToString() == enemyType;
+            return (int)bulletType == (int)enemyType;
 
         }
 }

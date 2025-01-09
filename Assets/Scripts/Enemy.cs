@@ -71,8 +71,6 @@ public class Enemy : MonoBehaviour
             _agent.enabled = true;
             _agent.SetDestination(_playerTransform.position);
         }
-        
-
     }
 
     public EnemyType GetEnemyType()
