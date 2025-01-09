@@ -17,45 +17,72 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float checkRadius = 0.25f;
     [SerializeField] public int damage = 5;
 
+    private readonly Collider[] _overlaps = new Collider[10];
     private float _timeActive;
-    
+
     private void OnEnable()
     {
+        int length = Physics.OverlapSphereNonAlloc(transform.position, checkRadius, _overlaps);
+        Debug.Log("Array length: " + length);
+        if (length > 0)
+        {
+            foreach (Collider col in _overlaps)
+            {
+                if (col == null) break;
+                
+                if (col.CompareTag("Enemy"))
+                {
+                    Enemy enemy = col.GetComponent<Enemy>();
+
+                    if (enemy)
+                    {
+                        if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
+                            enemy.TakeDamage(damage);
+                    }
+
+                    gameObject.SetActive(false);
+                    return;
+                }
+
+                gameObject.SetActive(false);
+            }
+        }
+        
         _timeActive = 0f;
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        _timeActive += Time.deltaTime;
-        if (_timeActive >= lifetime)
+        void Update()
         {
-            gameObject.SetActive(false);
-            return;
-        }
-
-        Ray ray = new Ray(transform.position, transform.forward);
-        if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
-        {
-            if (hitInfo.collider.CompareTag("Enemy"))
+            _timeActive += Time.deltaTime;
+            if (_timeActive >= lifetime)
             {
-                Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
-
-                if (enemy)
-                {
-                    if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
-                        enemy.TakeDamage(damage);
-                }
+                gameObject.SetActive(false);
+                return;
             }
-            gameObject.SetActive(false);
-        }
+
+            Ray ray = new Ray(transform.position, transform.forward);
+            if (Physics.SphereCast(ray, checkRadius, out RaycastHit hitInfo, speed * Time.deltaTime))
+            {
+                if (hitInfo.collider.CompareTag("Enemy"))
+                {
+                    Enemy enemy = hitInfo.collider.GetComponent<Enemy>();
+
+                    if (enemy)
+                    {
+                        if (CanDamageEnemyType(enemy.GetEnemyType().ToString()))
+                            enemy.TakeDamage(damage);
+                    }
+                }
+                gameObject.SetActive(false);
+            }
         
-        transform.Translate(Vector3.forward * (speed * Time.deltaTime));
-    }
+            transform.Translate(Vector3.forward * (speed * Time.deltaTime));
+        }
 
-    bool CanDamageEnemyType(string enemyType)
-    {
-        return bulletType.ToString() == enemyType;
+        bool CanDamageEnemyType(string enemyType)
+        {
+            return bulletType.ToString() == enemyType;
 
-    }
+        }
 }
