@@ -4,6 +4,16 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
+    public enum EnemyType
+    {
+        Sphere,
+        Cube,
+        Cylinder
+    }
+
+    [Header("Enemy Type Settings")]
+    [SerializeField] private EnemyType enemyType;
+
     [SerializeField] private int health = 20;
     [SerializeField] private float attackDistance = 2f;
     [SerializeField] private float attackCooldown = 1f;
@@ -64,12 +74,19 @@ public class Enemy : MonoBehaviour
         
 
     }
+
+    public EnemyType GetEnemyType()
+    {
+        return enemyType;
+    }
     
     public void TakeDamage(int damage)
     {
         health -= damage;
         if (health <= 0)
         {
+            // Add score before destroying the enemy
+            ScoreManager.Instance.AddKillScore();
             Destroy(gameObject);
         }
     }
