@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro; // Dodan uvoz za TextMeshPro
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float fireRate = 0.5f;
     [SerializeField] private int health = 20;
+
+    [SerializeField] private TextMeshProUGUI healthText; // Dodan UI Text za zdravje
 
     private InputAction _moveAction;
     private InputAction _attackAction;
@@ -68,6 +71,9 @@ public class PlayerController : MonoBehaviour
 
         // Update the direction the player will move relative to
         UpdateMovementDirection();
+
+        // Update the health text at the start of the game
+        healthText.text = "Health: " + health.ToString();  // Nastavi začetno zdravje
 
         // Confine the cursor to the screen
         Cursor.lockState = CursorLockMode.Confined;
@@ -146,7 +152,20 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
-        // bullet.GetComponent<Bullet>().CheckSpawn();
+        RaycastHit hit;
+        if (Physics.Raycast(bullet.transform.position, bullet.transform.forward, out hit))
+        {
+            // Preverimo, če je bil zadet sovražnik
+            if (hit.collider.CompareTag("Enemy")) // Poglej, če je tag sovražnika "Enemy"
+            {
+                // Kliči funkcijo za zamrznitev sovražnika
+                Enemy enemy = hit.collider.GetComponent<Enemy>();
+                if (enemy != null)
+                {
+                    enemy.Freeze(); // Zamrzni sovražnika
+                }
+            }
+        }
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)
@@ -157,18 +176,14 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 GetRayPlaneIntersection(Ray ray, float targetY)
     {
-        // Calculate the t value for the intersection
         float t = (targetY - ray.origin.y) / ray.direction.y;
 
-        // If t is negative, the intersection point is behind the ray's origin
         if (t < 0)
         {
-            return Vector3.zero; // No intersection in front of the ray
+            return Vector3.zero; 
         }
 
-        // Calculate the intersection point
         Vector3 intersection = ray.origin + t * ray.direction;
-
         return intersection;
     }
 
@@ -177,11 +192,15 @@ public class PlayerController : MonoBehaviour
         health -= damage;
         if (health <= 0)
         {
+            health = 0;
             Debug.Log("You died");
         }
         else
         {
             Debug.Log("You took damage, your current health: " + health);
         }
+
+        // Posodobite zdravje na UI
+        healthText.text = "Health: " + health.ToString();  // Prikaz zdravja kot tekst
     }
 }
