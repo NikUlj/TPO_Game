@@ -2,6 +2,9 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro; // Dodan uvoz za TextMeshPro
+using System.Threading.Tasks;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -33,6 +36,8 @@ public class PlayerController : MonoBehaviour
 
     private float _lastShotTime;
     private BulletPool _currentBulletPool;
+
+    private bool canMove = true; // Privzeto omogočeno premikanje
 
     private void Awake()
     {
@@ -86,12 +91,12 @@ public class PlayerController : MonoBehaviour
         _switchToCylinderAction?.Enable();
     }
 
-    private void OnDisable()
+    /*private void OnDisable()
     {
         _switchToSphereAction?.Disable();
         _switchToCubeAction?.Disable();
         _switchToCylinderAction?.Disable();
-    }
+    }*/
 
     void Update()
     {
@@ -102,6 +107,8 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
+        if (!canMove) return; // Če premikanje ni omogočeno, prekini metodo
+
         // Get the movement input
         Vector2 moveValue = _moveAction.ReadValue<Vector2>();
         if (moveValue == Vector2.zero)
@@ -152,20 +159,6 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
-        RaycastHit hit;
-        if (Physics.Raycast(bullet.transform.position, bullet.transform.forward, out hit))
-        {
-            // Preverimo, če je bil zadet sovražnik
-            if (hit.collider.CompareTag("Enemy")) // Poglej, če je tag sovražnika "Enemy"
-            {
-                // Kliči funkcijo za zamrznitev sovražnika
-                Enemy enemy = hit.collider.GetComponent<Enemy>();
-                if (enemy != null)
-                {
-                    enemy.Freeze(); // Zamrzni sovražnika
-                }
-            }
-        }
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)
@@ -189,18 +182,48 @@ public class PlayerController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-        if (health <= 0)
+        if(health != 0)
         {
-            health = 0;
-            Debug.Log("You died");
+            health -= damage;
+            if (health <= 0)
+            {
+                healthText.text = "Dead - Respawning soon";
+                health = 0;
+                Debug.Log("You died");
+                ResetGame();
+            }
+            else
+            {
+                Debug.Log("You took damage, your current health: " + health);
+                healthText.text = "Health: " + health.ToString();  // Prikaz zdravja kot tekst
+            }  
         }
-        else
-        {
-            Debug.Log("You took damage, your current health: " + health);
-        }
+    }
+    private void ResetGame()
+    {
+        StartCoroutine(ResetGameCoroutine());
+    }
 
-        // Posodobite zdravje na UI
-        healthText.text = "Health: " + health.ToString();  // Prikaz zdravja kot tekst
+    private IEnumerator ResetGameCoroutine()
+    {
+        // Onemogoči gibanje
+        canMove = false;
+
+        // Počakaj 3 sekunde pred začetkom ponastavitve
+        for (int i = 5; i > 0; i--)
+        {
+            healthText.text = "Dead - Respawning in " + i + " seconds.";
+            yield return new WaitForSeconds(1);
+        }
+        ScoreManager.Instance.ResetScore();
+        // Ponastavi zdravje
+        health = 20;
+        healthText.text = "Health: " + health.ToString();
+
+        // Omogoči gibanje
+        canMove = true;
+
+        Debug.Log("Game reset!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

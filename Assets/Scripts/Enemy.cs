@@ -26,7 +26,7 @@ public class Enemy : MonoBehaviour
     private float _lastDamageTime;
     private bool isDead = false; // Prepreči večkratno sprožitev smrti
     private bool isFrozen = false; // Dodana spremenljivka za zamrznitev
-    private float freezeDuration = 0.25f; // Trajanje zamrznitve (0.5 sekunde)
+    private float freezeDuration = 0.1f; // Trajanje zamrznitve (0.5 sekunde)
     
     private PlayerController _player;
     private Transform _playerTransform;
@@ -95,7 +95,7 @@ public class Enemy : MonoBehaviour
 
         health -= damage;
         PlayHitSound();
-        
+        Freeze();
 
         if (health <= 0)
         {

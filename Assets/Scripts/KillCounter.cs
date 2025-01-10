@@ -24,4 +24,7 @@ public class KillCounter : MonoBehaviour
             killCountText.text = "Kills: " + killCount.ToString();
         }
     }
+    public Text getKillCountText(){
+        return killCountText;
+    }
 }
