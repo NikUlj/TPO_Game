@@ -11,6 +11,9 @@ public class Bullet : MonoBehaviour
     }
 
     [SerializeField] private BulletType bulletType;
+    
+    [SerializeField] private AudioClip hitSound;
+    [SerializeField] private AudioSource audioSource;
 
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
@@ -23,6 +26,23 @@ public class Bullet : MonoBehaviour
     private void OnEnable()
     {
         _timeActive = 0f;
+    }
+
+    private void PlayHitSound()
+    {
+        if (audioSource && hitSound)
+        {
+            AudioSource.PlayClipAtPoint(hitSound, transform.position);
+        }
+        else
+        {
+            Debug.LogWarning("audioSource or hitSound missing");
+        }
+    }
+
+    private void OnDisable()
+    {
+        
     }
 
     public void CheckSpawn()
@@ -103,7 +123,9 @@ public class Bullet : MonoBehaviour
                     enemy.TakeDamage(damage);
             }
         }
+        PlayHitSound();
         gameObject.SetActive(false);
+        
     }
 
     bool CanDamageEnemyType(Enemy.EnemyType enemyType)

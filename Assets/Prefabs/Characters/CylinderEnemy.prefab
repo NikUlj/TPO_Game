@@ -361,6 +361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitSound: {fileID: 8300000, guid: e992f79d94564b941968f03f1aa1cb73, type: 3}
+  audioSource: {fileID: 390159849706698762}
   deathSound: {fileID: 8300000, guid: aafc616e3ab2ad548b6693be2369ee15, type: 3}
   enemyType: 2
   health: 40

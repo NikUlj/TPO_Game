@@ -18,6 +18,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int health = 20;
 
     [SerializeField] private TextMeshProUGUI healthText; // Dodan UI Text za zdravje
+    
+    [SerializeField] private AudioClip shootSound;
+    [SerializeField] private AudioSource audioSource;
 
     private InputAction _moveAction;
     private InputAction _attackAction;
@@ -159,6 +162,19 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
+        ShootSound();
+    }
+
+    private void ShootSound()
+    {
+        if (audioSource && shootSound)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+        else
+        {
+            Debug.LogWarning("audioSource or shootSound missing");
+        }
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)

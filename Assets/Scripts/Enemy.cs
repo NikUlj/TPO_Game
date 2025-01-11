@@ -4,9 +4,9 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
-    public AudioClip hitSound;
-    private AudioSource audioSource;
-    public AudioClip deathSound;
+    [SerializeField] private AudioClip hitSound;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip deathSound;
 
     public enum EnemyType
     {
