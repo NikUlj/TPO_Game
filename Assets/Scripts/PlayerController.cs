@@ -1,6 +1,10 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro; // Dodan uvoz za TextMeshPro
+using System.Threading.Tasks;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,6 +16,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private float fireRate = 0.5f;
     [SerializeField] private int health = 20;
+
+    [SerializeField] private TextMeshProUGUI healthText; // Dodan UI Text za zdravje
+    
+    [SerializeField] private AudioClip shootSound;
+    [SerializeField] private AudioSource audioSource;
 
     private InputAction _moveAction;
     private InputAction _attackAction;
@@ -30,6 +39,8 @@ public class PlayerController : MonoBehaviour
 
     private float _lastShotTime;
     private BulletPool _currentBulletPool;
+
+    private bool canMove = true; // Privzeto omogočeno premikanje
 
     private void Awake()
     {
@@ -69,6 +80,9 @@ public class PlayerController : MonoBehaviour
         // Update the direction the player will move relative to
         UpdateMovementDirection();
 
+        // Update the health text at the start of the game
+        healthText.text = "Health: " + health.ToString();  // Nastavi začetno zdravje
+
         // Confine the cursor to the screen
         Cursor.lockState = CursorLockMode.Confined;
     }
@@ -80,12 +94,12 @@ public class PlayerController : MonoBehaviour
         _switchToCylinderAction?.Enable();
     }
 
-    private void OnDisable()
+    /*private void OnDisable()
     {
         _switchToSphereAction?.Disable();
         _switchToCubeAction?.Disable();
         _switchToCylinderAction?.Disable();
-    }
+    }*/
 
     void Update()
     {
@@ -96,6 +110,8 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
+        if (!canMove) return; // Če premikanje ni omogočeno, prekini metodo
+
         // Get the movement input
         Vector2 moveValue = _moveAction.ReadValue<Vector2>();
         if (moveValue == Vector2.zero)
@@ -135,7 +151,7 @@ public class PlayerController : MonoBehaviour
 
     private void Shoot()
     {
-        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate || _currentBulletPool == null)
+        if (!_attackAction.IsPressed() || Time.time < _lastShotTime + fireRate || !_currentBulletPool)
         {
             return;
         }
@@ -146,6 +162,19 @@ public class PlayerController : MonoBehaviour
         if (!bullet) return;
         bullet.transform.position = _firePoint.position;
         bullet.transform.rotation = _firePoint.rotation;
+        ShootSound();
+    }
+
+    private void ShootSound()
+    {
+        if (audioSource && shootSound)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
+        else
+        {
+            Debug.LogWarning("audioSource or shootSound missing");
+        }
     }
 
     private void SwitchWeapon(BulletPool newPool, string weaponName)
@@ -156,31 +185,61 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 GetRayPlaneIntersection(Ray ray, float targetY)
     {
-        // Calculate the t value for the intersection
         float t = (targetY - ray.origin.y) / ray.direction.y;
 
-        // If t is negative, the intersection point is behind the ray's origin
         if (t < 0)
         {
-            return Vector3.zero; // No intersection in front of the ray
+            return Vector3.zero; 
         }
 
-        // Calculate the intersection point
         Vector3 intersection = ray.origin + t * ray.direction;
-
         return intersection;
     }
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-        if (health <= 0)
+        if(health != 0)
         {
-            Debug.Log("You died");
+            health -= damage;
+            if (health <= 0)
+            {
+                healthText.text = "Dead - Respawning soon";
+                health = 0;
+                Debug.Log("You died");
+                ResetGame();
+            }
+            else
+            {
+                Debug.Log("You took damage, your current health: " + health);
+                healthText.text = "Health: " + health.ToString();  // Prikaz zdravja kot tekst
+            }  
         }
-        else
+    }
+    private void ResetGame()
+    {
+        StartCoroutine(ResetGameCoroutine());
+    }
+
+    private IEnumerator ResetGameCoroutine()
+    {
+        // Onemogoči gibanje
+        canMove = false;
+
+        // Počakaj 3 sekunde pred začetkom ponastavitve
+        for (int i = 5; i > 0; i--)
         {
-            Debug.Log("You took damage, your current health: " + health);
+            healthText.text = "Dead - Respawning in " + i + " seconds.";
+            yield return new WaitForSeconds(1);
         }
+        ScoreManager.Instance.ResetScore();
+        // Ponastavi zdravje
+        health = 20;
+        healthText.text = "Health: " + health.ToString();
+
+        // Omogoči gibanje
+        canMove = true;
+
+        Debug.Log("Game reset!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

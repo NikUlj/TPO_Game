@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI; // Omogoča delo z UI komponentami
 
 public class ScoreManager : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    [SerializeField] private Text killCountText; // Referenca na UI tekst
     private int _currentScore = 0;
 
     private void Awake()
@@ -32,12 +34,16 @@ public class ScoreManager : MonoBehaviour
 
         _instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // Poskrbi, da tekst prikaže začetno vrednost
+        UpdateKillCountText();
     }
 
     public void AddScore(int points)
     {
         _currentScore += points;
         Debug.Log($"Score increased! Current score: {_currentScore}");
+        UpdateKillCountText();
     }
 
     public void AddKillScore()
@@ -54,5 +60,18 @@ public class ScoreManager : MonoBehaviour
     {
         _currentScore = 0;
         Debug.Log("Score reset to 0");
+        UpdateKillCountText();
+    }
+
+    private void UpdateKillCountText()
+    {
+        if (killCountText != null)
+        {
+            killCountText.text = "Kills: " + _currentScore;
+        }
+        else
+        {
+            Debug.LogWarning("KillCountText UI element ni nastavljen v ScoreManager!");
+        }
     }
 }
