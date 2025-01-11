@@ -274,7 +274,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c300da260a53548862f465577675a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitSound: {fileID: 8300000, guid: b80ae14dfc5714b4ab43031fb893d247, type: 3}
+  hitSound: {fileID: 8300000, guid: 20ffaff825c41cf4e8ac55ec9b8fdf7a, type: 3}
+  deathSound: {fileID: 0}
   enemyType: 0
   health: 20
   attackDistance: 2
