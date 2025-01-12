@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PauseMenuScript : MonoBehaviour
+public class PauseMenu : MonoBehaviour
 {
     public static bool isPaused = false;
 
