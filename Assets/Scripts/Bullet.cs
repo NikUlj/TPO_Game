@@ -56,7 +56,6 @@ public class Bullet : MonoBehaviour
         {
             Debug.LogWarning("audioSource or hitSound missing");
         }
-        Debug.Log("Effect pool size: " + _effectPool._pool.Count);
     }
 
 
@@ -148,7 +147,6 @@ public class Bullet : MonoBehaviour
             effect.transform.position = transform.position;
             effect.transform.rotation = Quaternion.identity;
 
-            Debug.Log("Effect pool is active before coroutine: " + _effectPool.isActiveAndEnabled);
             _effectPool.StartCoroutine(ReturnEffectToPool(effect));
         }
         gameObject.SetActive(false);
