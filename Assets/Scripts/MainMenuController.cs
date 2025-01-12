@@ -1,11 +1,14 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class MainMenuController : MonoBehaviour
 {
     public CanvasGroup OptionPanel;
+    [SerializeField] private PauseMenuScript pauseMenuScript;
 
     public void PlayGame(){
+        Time.timeScale =  1f;
         SceneManager.LoadScene(2);
     }
 
@@ -20,6 +23,10 @@ public class MainMenuController : MonoBehaviour
     }
 
     public void Back(){
+        if (pauseMenuScript)
+        {
+            pauseMenuScript.isPaused = false;
+        }
         SceneManager.LoadScene(0);
     }
 

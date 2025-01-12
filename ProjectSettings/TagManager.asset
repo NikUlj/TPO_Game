@@ -8,6 +8,8 @@ TagManager:
   - SpherePool
   - CubePool
   - CylinderPool
+  - Music
+  - ScoreManager
   layers:
   - Default
   - TransparentFX

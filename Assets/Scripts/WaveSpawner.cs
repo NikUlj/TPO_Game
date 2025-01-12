@@ -19,6 +19,8 @@ public class WaveSpawner : MonoBehaviour
     [Header("Wave Settings")]
     [SerializeField] private Wave[] waves;
 
+    [SerializeField] private MainMenuController mainMenuController;
+
     private int _currentWave = 0;
     private int _remainingEnemies = 0;
     private bool _isSpawning = false;
@@ -46,6 +48,7 @@ public class WaveSpawner : MonoBehaviour
         {
             Debug.Log("All waves completed!");
             Debug.Log("VICTORY!");
+            mainMenuController.Back();
             return;
         }
 

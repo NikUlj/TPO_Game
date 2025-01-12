@@ -32,6 +32,8 @@ public class Enemy : MonoBehaviour
     private Transform _playerTransform;
     private NavMeshAgent _agent;
 
+    private ScoreManager _scoreManager;
+
     private void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
