@@ -33,7 +33,7 @@ public class ScoreManager : MonoBehaviour
         }
 
         _instance = this;
-        DontDestroyOnLoad(gameObject);
+        // DontDestroyOnLoad(gameObject);
 
         // Poskrbi, da tekst prikaže začetno vrednost
         UpdateKillCountText();
@@ -67,6 +67,7 @@ public class ScoreManager : MonoBehaviour
     {
         if (killCountText != null)
         {
+            Debug.Log("Score is now: " + _currentScore);
             killCountText.text = "Kills: " + _currentScore;
         }
         else

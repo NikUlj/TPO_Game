@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,7 @@ public class KillCounter : MonoBehaviour
     private int killCount = 0;
 
     // Metoda za dodajanje kill-a
+
     public void AddKill()
     {
         killCount++;
