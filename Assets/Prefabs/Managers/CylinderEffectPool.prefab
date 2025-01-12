@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   particleEffect: {fileID: 19814690, guid: cd4d7020429cde74db076ffa72495419, type: 3}
-  poolSize: 20
+  poolSize: 40

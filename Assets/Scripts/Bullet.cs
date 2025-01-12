@@ -83,7 +83,7 @@ public class Bullet : MonoBehaviour
         _timeActive += Time.deltaTime;
         if (_timeActive >= lifetime)
         {
-            gameObject.SetActive(false);
+            DeactivateBullet();
             return;
         }
 
