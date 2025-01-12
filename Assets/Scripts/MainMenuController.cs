@@ -6,7 +6,12 @@ public class MainMenuController : MonoBehaviour
     public CanvasGroup OptionPanel;
 
     public void PlayGame(){
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene(2);
+    }
+
+    public void Instructions()
+    {
+        SceneManager.LoadScene(1);
     }
 
     public void Option(){
@@ -15,8 +20,7 @@ public class MainMenuController : MonoBehaviour
     }
 
     public void Back(){
-        OptionPanel.alpha = 0;
-        OptionPanel.blocksRaycasts = false;
+        SceneManager.LoadScene(0);
     }
 
     public void QuitGame(){
