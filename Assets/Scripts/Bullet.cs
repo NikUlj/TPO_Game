@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
@@ -14,6 +16,8 @@ public class Bullet : MonoBehaviour
     
     [SerializeField] private AudioClip hitSound;
     [SerializeField] private AudioSource audioSource;
+
+    [SerializeField] private ParticleEffectPool effectPool;
 
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
@@ -40,10 +44,6 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        
-    }
 
     public void CheckSpawn()
     {
@@ -123,9 +123,29 @@ public class Bullet : MonoBehaviour
                     enemy.TakeDamage(damage);
             }
         }
+        DeactivateBullet();
+    }
+
+    private void DeactivateBullet()
+    {
         PlayHitSound();
+        if (effectPool)
+        {
+            
+            ParticleSystem effect = effectPool.GetEffect();
+            Debug.Log("Effect: " + effect);
+            effect.transform.position = transform.position;
+            effect.transform.rotation = Quaternion.identity;
+
+            StartCoroutine(ReturnEffectToPool(effect));
+        }
         gameObject.SetActive(false);
-        
+    }
+
+    private IEnumerator ReturnEffectToPool(ParticleSystem effect)
+    {
+        yield return new WaitForSeconds(effect.main.duration + effect.main.startLifetime.constantMax);
+        effectPool.ReturnEffect(effect);
     }
 
     bool CanDamageEnemyType(Enemy.EnemyType enemyType)

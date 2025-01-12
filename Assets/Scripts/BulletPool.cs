@@ -7,7 +7,7 @@ public class BulletPool : MonoBehaviour
 
     private GameObject[] _bulletPool;
     
-    void Awake()
+    private void Start()
     {
         _bulletPool = new GameObject[poolSize];
 
