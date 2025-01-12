@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
@@ -15,6 +17,8 @@ public class Bullet : MonoBehaviour
     [SerializeField] private AudioClip hitSound;
     [SerializeField] private AudioSource audioSource;
 
+    private ParticleEffectPool _effectPool;
+
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
     [SerializeField] private float checkRadius = 0.5f;
@@ -22,6 +26,20 @@ public class Bullet : MonoBehaviour
 
     private readonly Collider[] _overlaps = new Collider[10];
     private float _timeActive;
+
+    private void Awake()
+    {
+        GameObject poolObject = GameObject.FindWithTag(bulletType.ToString() + "Pool");
+        _effectPool = poolObject.GetComponent<ParticleEffectPool>();
+        if (_effectPool != null)
+        {
+            Debug.Log("Found ParticleEffectPool: " + poolObject.name);
+        }
+        else
+        {
+            Debug.LogError("ParticleEffectPool script not found on the object!");
+        }
+    }
 
     private void OnEnable()
     {
@@ -40,16 +58,11 @@ public class Bullet : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        
-    }
 
     public void CheckSpawn()
     {
         Array.Clear(_overlaps, 0, _overlaps.Length);
         int length = Physics.OverlapSphereNonAlloc(transform.position, checkRadius, _overlaps);
-        Debug.Log(length);
         if (length > 0)
         {
             for (int i = 0; i < length; i++)
@@ -83,7 +96,7 @@ public class Bullet : MonoBehaviour
         _timeActive += Time.deltaTime;
         if (_timeActive >= lifetime)
         {
-            gameObject.SetActive(false);
+            DeactivateBullet();
             return;
         }
 
@@ -111,8 +124,6 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
-        Debug.Log("Collider detected: " + other.gameObject.name + ", Tag: " + other.gameObject.tag);
         if (other.CompareTag("Enemy"))
         {
             Enemy enemy = other.GetComponent<Enemy>();
@@ -123,9 +134,28 @@ public class Bullet : MonoBehaviour
                     enemy.TakeDamage(damage);
             }
         }
+        DeactivateBullet();
+    }
+
+    private void DeactivateBullet()
+    {
         PlayHitSound();
+        if (_effectPool)
+        {
+            
+            ParticleSystem effect = _effectPool.GetEffect();
+            effect.transform.position = transform.position;
+            effect.transform.rotation = Quaternion.identity;
+
+            _effectPool.StartCoroutine(ReturnEffectToPool(effect));
+        }
         gameObject.SetActive(false);
-        
+    }
+
+    private IEnumerator ReturnEffectToPool(ParticleSystem effect)
+    {
+        yield return new WaitForSeconds(effect.main.duration + effect.main.startLifetime.constantMax);
+        _effectPool.ReturnEffect(effect);
     }
 
     bool CanDamageEnemyType(Enemy.EnemyType enemyType)
