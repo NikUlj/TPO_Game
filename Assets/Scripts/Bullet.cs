@@ -17,7 +17,7 @@ public class Bullet : MonoBehaviour
     [SerializeField] private AudioClip hitSound;
     [SerializeField] private AudioSource audioSource;
 
-    [SerializeField] private ParticleEffectPool effectPool;
+    private ParticleEffectPool _effectPool;
 
     [SerializeField] private float speed = 10f;
     [SerializeField] private float lifetime = 5f;
@@ -26,6 +26,20 @@ public class Bullet : MonoBehaviour
 
     private readonly Collider[] _overlaps = new Collider[10];
     private float _timeActive;
+
+    private void Awake()
+    {
+        GameObject poolObject = GameObject.FindWithTag(bulletType.ToString() + "Pool");
+        _effectPool = poolObject.GetComponent<ParticleEffectPool>();
+        if (_effectPool != null)
+        {
+            Debug.Log("Found ParticleEffectPool: " + poolObject.name);
+        }
+        else
+        {
+            Debug.LogError("ParticleEffectPool script not found on the object!");
+        }
+    }
 
     private void OnEnable()
     {
@@ -42,6 +56,7 @@ public class Bullet : MonoBehaviour
         {
             Debug.LogWarning("audioSource or hitSound missing");
         }
+        Debug.Log("Effect pool size: " + _effectPool._pool.Count);
     }
 
 
@@ -49,7 +64,6 @@ public class Bullet : MonoBehaviour
     {
         Array.Clear(_overlaps, 0, _overlaps.Length);
         int length = Physics.OverlapSphereNonAlloc(transform.position, checkRadius, _overlaps);
-        Debug.Log(length);
         if (length > 0)
         {
             for (int i = 0; i < length; i++)
@@ -111,8 +125,6 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
-        Debug.Log("Collider detected: " + other.gameObject.name + ", Tag: " + other.gameObject.tag);
         if (other.CompareTag("Enemy"))
         {
             Enemy enemy = other.GetComponent<Enemy>();
@@ -129,15 +141,15 @@ public class Bullet : MonoBehaviour
     private void DeactivateBullet()
     {
         PlayHitSound();
-        if (effectPool)
+        if (_effectPool)
         {
             
-            ParticleSystem effect = effectPool.GetEffect();
-            Debug.Log("Effect: " + effect);
+            ParticleSystem effect = _effectPool.GetEffect();
             effect.transform.position = transform.position;
             effect.transform.rotation = Quaternion.identity;
 
-            StartCoroutine(ReturnEffectToPool(effect));
+            Debug.Log("Effect pool is active before coroutine: " + _effectPool.isActiveAndEnabled);
+            _effectPool.StartCoroutine(ReturnEffectToPool(effect));
         }
         gameObject.SetActive(false);
     }
@@ -145,7 +157,7 @@ public class Bullet : MonoBehaviour
     private IEnumerator ReturnEffectToPool(ParticleSystem effect)
     {
         yield return new WaitForSeconds(effect.main.duration + effect.main.startLifetime.constantMax);
-        effectPool.ReturnEffect(effect);
+        _effectPool.ReturnEffect(effect);
     }
 
     bool CanDamageEnemyType(Enemy.EnemyType enemyType)

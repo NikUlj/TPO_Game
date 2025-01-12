@@ -205,12 +205,10 @@ public class PlayerController : MonoBehaviour
             {
                 healthText.text = "Dead - Respawning soon";
                 health = 0;
-                Debug.Log("You died");
                 ResetGame();
             }
             else
             {
-                Debug.Log("You took damage, your current health: " + health);
                 healthText.text = "Health: " + health.ToString();  // Prikaz zdravja kot tekst
             }  
         }

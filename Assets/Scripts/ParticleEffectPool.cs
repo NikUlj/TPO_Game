@@ -8,16 +8,18 @@ public class ParticleEffectPool : MonoBehaviour
     [SerializeField] private ParticleSystem particleEffect;
     [SerializeField] private int poolSize = 20;
 
-    private readonly Queue<ParticleSystem> _pool = new();
+    public readonly Queue<ParticleSystem> _pool = new();
 
     private void Awake()
     {
+        Debug.Log($"Initializing ParticleEffectPool with size {poolSize}");
         for (int i = 0; i < poolSize; i++)
         {
             ParticleSystem effect = Instantiate(particleEffect);
             effect.gameObject.SetActive(false);
             _pool.Enqueue(effect);
         }
+        Debug.Log($"ParticleEffectPool initialized with {_pool.Count} effects.");
     }
 
     public ParticleSystem GetEffect()

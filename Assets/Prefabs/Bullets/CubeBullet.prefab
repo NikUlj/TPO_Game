@@ -105,7 +105,7 @@ MonoBehaviour:
   bulletType: 1
   hitSound: {fileID: 8300000, guid: b67c7607867121f4881113cc90cb7db2, type: 3}
   audioSource: {fileID: -6878297700196769152}
-  effectPool: {fileID: 9179934267537707692, guid: 66ddb8029eead1d4c86b69515d9dbf91, type: 3}
+  effectPool: {fileID: 0}
   speed: 10
   lifetime: 5
   checkRadius: 0.25
